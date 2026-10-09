@@ -20,7 +20,30 @@ double grasp(const Instancia &inst, std::vector<int> &s,
     std::vector<int> sEstrela;
     double foEstrela = std::numeric_limits<double>::max();
 
+    double fo;
     //TODO
+    int iter = 0;
+    while (iter < graspMax){
+        iter++;
+        switch(tipoConstrucao){
+            case 1:
+                constroiSolucaoParcialmenteGulosaVizinhoMaisProximo(inst, s, alpha);
+                break;
+            case 2:
+                constroiSolucaoParcialmenteGulosaInsercaoMaisBarata(inst, s, alpha);
+                break;
+            default:
+                std::exit(1);
+                break;
+        }
+        fo = descidaCompleta(inst, s);
+        if(fo < foEstrela){
+            sEstrela = s;
+            foEstrela = fo;
+            iter = 0;
+        }
+
+    }
 
     s = sEstrela;
     return foEstrela;

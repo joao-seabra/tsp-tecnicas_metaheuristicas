@@ -8,6 +8,8 @@
 #include <numeric>    // std::iota
 #include <limits>
 #include <cstddef>
+#include <map>
+#include <cmath>
 
 // ============================================================================
 // [EXERCÍCIO] Vizinho Mais Próximo (guloso)
@@ -105,9 +107,36 @@ double constroiSolucaoParcialmenteGulosaVizinhoMaisProximo(const Instancia &inst
 
     s.assign(n, -1);
     s[0] = 0;
-
+    int iterS = 0;
     
     //TODO
+    std::vector<std::pair<int, double>> g;
+    int LCR = 0, ultimaInserida = 0;
+    double gMin, gMax, gAlpha;
+    while(!naoVisitadas.empty()){
+        for(int cidade : naoVisitadas){
+            g.push_back(std::pair<int, double>(cidade, inst.distancia(s[iterS], cidade)));
+        }
+        std::sort(g.begin(), g.end(), [](std::pair<int, double> &g1, std::pair<int, double> &g2){
+            return g1.second < g2.second;
+        });
+        gMin = g.front().second;
+        gMax = g.back().second;
+
+        // LCR = std::ceil(std::max(1.0, alpha * g.size()));
+        // ultimaInserida = inteiroAleatorio(0, LCR - 1);
+        
+        gAlpha = gMin + alpha * (gMax - gMin);
+        LCR = 0;
+        while(g.at(LCR).second < gAlpha) LCR++;
+
+        ultimaInserida = inteiroAleatorio(0, LCR);
+
+        s[++iterS] = g.at(ultimaInserida).first;
+        fo += g.at(ultimaInserida).second;
+        
+        naoVisitadas.erase(naoVisitadas.cbegin() + ultimaInserida);        
+    }
 
     return fo;
 }
@@ -218,7 +247,33 @@ double constroiSolucaoParcialmenteGulosaInsercaoMaisBarata(const Instancia &inst
     rota.reserve(n);
     rota.push_back(0);
 
+    int cidadeAtual = rota[0];
+    for(size_t i = 0; i < 3; i++){
+        int indexProximaCidade = 0;
+        double menorDist = __DBL_MAX__;
+        double distancia = 0;
+        for(size_t j = 0; j < naoVisitadas.size(); j++){
+        //itera pelas cidades não visitadas procurando a menor distância
+            distancia = inst.distancia(cidadeAtual, naoVisitadas[j]);
+            if(distancia < menorDist){
+                menorDist = distancia;
+                indexProximaCidade = j;
+            }
+        }
+        cidadeAtual = naoVisitadas[indexProximaCidade]; //visita a cidade de menor distância
+        naoVisitadas.erase(naoVisitadas.begin() + indexProximaCidade);
+        
+        rota.push_back(cidadeAtual); //adiciona na rota
+
+        fo += menorDist;
+        
+    }
+
+    fo += inst.distancia(cidadeAtual, rota[0]);
     //TODO
+
+    
+
 
     return fo;
 }
