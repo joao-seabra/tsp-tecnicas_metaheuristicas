@@ -27,10 +27,10 @@ double grasp(const Instancia &inst, std::vector<int> &s,
         iter++;
         switch(tipoConstrucao){
             case 1:
-                constroiSolucaoParcialmenteGulosaVizinhoMaisProximo(inst, s, alpha);
+                fo = constroiSolucaoParcialmenteGulosaVizinhoMaisProximo(inst, s, alpha);
                 break;
             case 2:
-                constroiSolucaoParcialmenteGulosaInsercaoMaisBarata(inst, s, alpha);
+                fo = constroiSolucaoParcialmenteGulosaInsercaoMaisBarata(inst, s, alpha);
                 break;
             default:
                 std::exit(1);

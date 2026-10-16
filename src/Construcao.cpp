@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <map>
 #include <cmath>
+#include <iostream>
 
 // ============================================================================
 // [EXERCÍCIO] Vizinho Mais Próximo (guloso)
@@ -108,7 +109,6 @@ double constroiSolucaoParcialmenteGulosaVizinhoMaisProximo(const Instancia &inst
     s.assign(n, -1);
     s[0] = 0;
     int iterS = 0;
-    
     //TODO
     std::vector<std::pair<int, double>> g;
     int LCR = 0, ultimaInserida = 0;
@@ -123,19 +123,20 @@ double constroiSolucaoParcialmenteGulosaVizinhoMaisProximo(const Instancia &inst
         gMin = g.front().second;
         gMax = g.back().second;
 
-        // LCR = std::ceil(std::max(1.0, alpha * g.size()));
-        // ultimaInserida = inteiroAleatorio(0, LCR - 1);
+        LCR = std::ceil(std::max(1.0, alpha * g.size()));
+        ultimaInserida = inteiroAleatorio(0, LCR - 1);
         
-        gAlpha = gMin + alpha * (gMax - gMin);
-        LCR = 0;
-        while(g.at(LCR).second < gAlpha) LCR++;
+        // gAlpha = gMin + alpha * (gMax - gMin);
+        // LCR = 0;
+        // while(g.at(LCR).second <= gAlpha) LCR++;
 
-        ultimaInserida = inteiroAleatorio(0, LCR);
+        // ultimaInserida = inteiroAleatorio(0, LCR-1);
 
         s[++iterS] = g.at(ultimaInserida).first;
         fo += g.at(ultimaInserida).second;
         
-        naoVisitadas.erase(naoVisitadas.cbegin() + ultimaInserida);        
+        naoVisitadas.erase(std::find(naoVisitadas.begin(), naoVisitadas.end(), g.at(ultimaInserida).first));
+        g.erase(g.begin(), g.end());  
     }
 
     return fo;
@@ -272,6 +273,35 @@ double constroiSolucaoParcialmenteGulosaInsercaoMaisBarata(const Instancia &inst
     fo += inst.distancia(cidadeAtual, rota[0]);
     //TODO
 
+    std::vector<std::pair<int, double>> g;
+    int LCR = 0, ultimaInserida = 0;
+    double gMin, gMax, gAlpha;
+    double custoInsercao = 0;
+    while(!naoVisitadas.empty()){
+        for(size_t pos = 0; pos < rota.size(); pos++){
+            int i = rota[pos];
+            int j = rota[(pos + 1) % rota.size()];      
+            for(int cidade : naoVisitadas){
+                custoInsercao = inst.distancia(i, cidade) + inst.distancia(cidade, j) - inst.distancia(i, j);
+                g.push_back(std::pair<int, double>(cidade, custoInsercao));
+            }
+            std::sort(g.begin(), g.end(), [](std::pair<int, double> &g1, std::pair<int, double> &g2){
+                return g1.second < g2.second;
+            });
+            gMin = g.front().second;
+            gMax = g.back().second;
+
+            LCR = std::ceil(std::max(1.0, alpha * g.size()));
+            ultimaInserida = inteiroAleatorio(0, LCR - 1);
+            
+            rota.emplace(rota.begin() + pos + 1, g.at(ultimaInserida).first);
+            fo += g.at(ultimaInserida).second;
+
+            naoVisitadas.erase(std::find(naoVisitadas.begin(), naoVisitadas.end(), g.at(ultimaInserida).first));
+            g.erase(g.begin(), g.end());  
+        }
+        
+    }
     
 
 

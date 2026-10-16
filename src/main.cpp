@@ -43,8 +43,8 @@ int main()
     // Nomes dos arquivos da instância a ser resolvida. Para trocar de
     // instância, basta alterar estes dois nomes (ex.: "C50INFO.TXT" /
     // "C50.TXT").
-    const std::string arquivoInfo = "instancias/C50INFO.TXT";
-    const std::string arquivoCoordenadas = "instancias/C50.TXT";
+    const std::string arquivoInfo = "/home/joaopwsl/TecnicasMetaHeuristicas/tsp-tecnicas_metaheuristicas_git/instancias/C50INFO.TXT";
+    const std::string arquivoCoordenadas = "/home/joaopwsl/TecnicasMetaHeuristicas/tsp-tecnicas_metaheuristicas_git/instancias/C50.TXT";
 
     int n;
     double melhorFoLiteratura;
