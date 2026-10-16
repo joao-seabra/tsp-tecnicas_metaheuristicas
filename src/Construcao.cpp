@@ -42,7 +42,7 @@ double constroiSolucaoGulosaVizinhoMaisProximo(const Instancia &inst,
         double menorDist = __DBL_MAX__;
         double distancia = 0;
 
-        for(size_t j = 0; j < naoVisitadas.size(); j++){
+        for(int j = 0; j < naoVisitadas.size(); j++){
         //itera pelas cidades não visitadas procurando a menor distância
             distancia = inst.distancia(cidadeAtual, naoVisitadas[j]);
             if(distancia < menorDist){
@@ -163,11 +163,11 @@ double constroiSolucaoGulosaInsercaoMaisBarata(const Instancia &inst,
     // rota com menos de 3 cidades).
 
     int cidadeAtual = rota[0];
-    for(size_t i = 0; i < 3; i++){
+    for(int i = 0; i < 3; i++){
         int indexProximaCidade = 0;
         double menorDist = __DBL_MAX__;
         double distancia = 0;
-        for(size_t j = 0; j < naoVisitadas.size(); j++){
+        for(int j = 0; j < naoVisitadas.size(); j++){
         //itera pelas cidades não visitadas procurando a menor distância
             distancia = inst.distancia(cidadeAtual, naoVisitadas[j]);
             if(distancia < menorDist){
@@ -202,11 +202,11 @@ double constroiSolucaoGulosaInsercaoMaisBarata(const Instancia &inst,
         double menorCusto = __DBL_MAX__;
         double custoInsercao = 0;
         
-        for(size_t pos = 0; pos < rota.size(); pos++){
+        for(int pos = 0; pos < rota.size(); pos++){
 
             int i = rota[pos];
             int j = rota[(pos+1) % rota.size()]; //vizinho de i na rota atual (volta para a cidade inicial depois da utlima)
-            for(size_t k = 0; k < naoVisitadas.size(); k++){
+            for(int k = 0; k < naoVisitadas.size(); k++){
                 int cidadeK = naoVisitadas[k];
 
                 custoInsercao = inst.distancia(i, cidadeK) + inst.distancia(cidadeK, j) - inst.distancia(i, j);
@@ -234,6 +234,7 @@ typedef struct listaCandidatosGRASP{
     int cidade;
     double custoInsercao;
     int proximaCidade;
+    int indiceNaoVisitadas;
 }listaCandidatosGRASP;
 
 // ============================================================================
@@ -256,10 +257,10 @@ double constroiSolucaoParcialmenteGulosaInsercaoMaisBarata(const Instancia &inst
     
     int cidadeAtual = rota[0];
     int indexProximaCidade = 0;
-    for(size_t i = 0; i < 3; i++){
+    for(int i = 0; i < 3; i++){
         double menorDist = __DBL_MAX__;
         double distancia = 0;
-        for(size_t j = 0; j < naoVisitadas.size(); j++){
+        for(int j = 0; j < naoVisitadas.size(); j++){
         //itera pelas cidades não visitadas procurando a menor distância
             distancia = inst.distancia(cidadeAtual, naoVisitadas[j]);
             if(distancia < menorDist){
@@ -284,33 +285,45 @@ double constroiSolucaoParcialmenteGulosaInsercaoMaisBarata(const Instancia &inst
     double gMin, gMax, gAlpha;
     double custoInsercao = 0;
     while(!naoVisitadas.empty()){
-        for(size_t pos = 0; pos < rota.size(); pos++){
-            int i = rota[pos];
-            int j = rota[(pos + 1) % rota.size()];      
-            for(int cidade : naoVisitadas){
+
+        for(int k = 0; k < naoVisitadas.size(); k++){
+            int cidade = naoVisitadas[k];
+            double melhorCusto = __DBL_MAX__;
+            int melhorPos = 1;
+            for(int pos = 0; pos < rota.size(); pos++){
+                int i = rota[pos];
+                int j = rota[(pos + 1) % rota.size()];
+                
                 custoInsercao = inst.distancia(i, cidade) + inst.distancia(cidade, j) - inst.distancia(i, j);
-                g.push_back(listaCandidatosGRASP{cidade, custoInsercao, j});
+                if(custoInsercao < melhorCusto){
+                    melhorCusto = custoInsercao;
+                    melhorPos = pos + 1;
+                }
             }
+
+            g.push_back(listaCandidatosGRASP{cidade, melhorCusto, melhorPos, k});
+
         }
+
         std::sort(g.begin(), g.end(), [](listaCandidatosGRASP &g1, listaCandidatosGRASP &g2){
             return g1.custoInsercao < g2.custoInsercao;
         });
+
         gMin = g.front().custoInsercao;
         gMax = g.back().custoInsercao;
 
         LCR = std::ceil(std::max(1.0, alpha * g.size()));
         escolhidaDaLCR = inteiroAleatorio(0, LCR - 1);
         
-        rota.emplace(rota.begin() + g.at(escolhidaDaLCR).proximaCidade, g.at(escolhidaDaLCR).cidade);
+        rota.insert(rota.begin() + g.at(escolhidaDaLCR).proximaCidade, g.at(escolhidaDaLCR).cidade);
         fo += g.at(escolhidaDaLCR).custoInsercao;
 
-        naoVisitadas.erase(std::find(naoVisitadas.begin(), naoVisitadas.end(), g.at(escolhidaDaLCR).cidade));
-        g.erase(g.begin(), g.end());  
-        
+        naoVisitadas.erase(naoVisitadas.begin() + g.at(escolhidaDaLCR).indiceNaoVisitadas);
+        g.clear();  
         
     }
     
-
+    s = rota;
 
     return fo;
 }
