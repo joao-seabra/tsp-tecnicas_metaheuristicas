@@ -230,6 +230,12 @@ double constroiSolucaoGulosaInsercaoMaisBarata(const Instancia &inst,
     return fo;
 }
 
+typedef struct listaCandidatosGRASP{
+    int cidade;
+    double custoInsercao;
+    int proximaCidade;
+}listaCandidatosGRASP;
+
 // ============================================================================
 // [EXERCÍCIO] Inserção Mais Barata parcialmente gulosa (GRASP)
 // ============================================================================
@@ -243,14 +249,14 @@ double constroiSolucaoParcialmenteGulosaInsercaoMaisBarata(const Instancia &inst
 
     std::vector<int> naoVisitadas(n - 1);
     std::iota(naoVisitadas.begin(), naoVisitadas.end(), 1);
-
+    
     std::vector<int> rota;
     rota.reserve(n);
     rota.push_back(0);
-
+    
     int cidadeAtual = rota[0];
+    int indexProximaCidade = 0;
     for(size_t i = 0; i < 3; i++){
-        int indexProximaCidade = 0;
         double menorDist = __DBL_MAX__;
         double distancia = 0;
         for(size_t j = 0; j < naoVisitadas.size(); j++){
@@ -273,8 +279,8 @@ double constroiSolucaoParcialmenteGulosaInsercaoMaisBarata(const Instancia &inst
     fo += inst.distancia(cidadeAtual, rota[0]);
     //TODO
 
-    std::vector<std::pair<int, double>> g;
-    int LCR = 0, ultimaInserida = 0;
+    std::vector<listaCandidatosGRASP> g;
+    int LCR = 0, escolhidaDaLCR = 0;
     double gMin, gMax, gAlpha;
     double custoInsercao = 0;
     while(!naoVisitadas.empty()){
@@ -283,23 +289,24 @@ double constroiSolucaoParcialmenteGulosaInsercaoMaisBarata(const Instancia &inst
             int j = rota[(pos + 1) % rota.size()];      
             for(int cidade : naoVisitadas){
                 custoInsercao = inst.distancia(i, cidade) + inst.distancia(cidade, j) - inst.distancia(i, j);
-                g.push_back(std::pair<int, double>(cidade, custoInsercao));
+                g.push_back(listaCandidatosGRASP{cidade, custoInsercao, j});
             }
-            std::sort(g.begin(), g.end(), [](std::pair<int, double> &g1, std::pair<int, double> &g2){
-                return g1.second < g2.second;
-            });
-            gMin = g.front().second;
-            gMax = g.back().second;
-
-            LCR = std::ceil(std::max(1.0, alpha * g.size()));
-            ultimaInserida = inteiroAleatorio(0, LCR - 1);
-            
-            rota.emplace(rota.begin() + pos + 1, g.at(ultimaInserida).first);
-            fo += g.at(ultimaInserida).second;
-
-            naoVisitadas.erase(std::find(naoVisitadas.begin(), naoVisitadas.end(), g.at(ultimaInserida).first));
-            g.erase(g.begin(), g.end());  
         }
+        std::sort(g.begin(), g.end(), [](listaCandidatosGRASP &g1, listaCandidatosGRASP &g2){
+            return g1.custoInsercao < g2.custoInsercao;
+        });
+        gMin = g.front().custoInsercao;
+        gMax = g.back().custoInsercao;
+
+        LCR = std::ceil(std::max(1.0, alpha * g.size()));
+        escolhidaDaLCR = inteiroAleatorio(0, LCR - 1);
+        
+        rota.emplace(rota.begin() + g.at(escolhidaDaLCR).proximaCidade, g.at(escolhidaDaLCR).cidade);
+        fo += g.at(escolhidaDaLCR).custoInsercao;
+
+        naoVisitadas.erase(std::find(naoVisitadas.begin(), naoVisitadas.end(), g.at(escolhidaDaLCR).cidade));
+        g.erase(g.begin(), g.end());  
+        
         
     }
     
