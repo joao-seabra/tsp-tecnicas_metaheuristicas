@@ -159,7 +159,7 @@ int main()
 
         case 7: { // Busca Tabu
             Cronometro cron;
-            double fo = buscaTabu(inst, s, 2, 100);
+            double fo = buscaTabu(inst, s, 7, 100);
             std::cout << "Tempo execucao = " << cron.segundosDecorridos() << " segundos\n"
                        << "Distancia percorrida = " << fo << '\n';
             imprimeRota(s);
