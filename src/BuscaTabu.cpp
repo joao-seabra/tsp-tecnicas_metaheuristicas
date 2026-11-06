@@ -41,7 +41,7 @@ double melhorVizinhoTabu(const Instancia &inst, std::vector<int> &s, double fo,
             delta2 = calculaDelta(inst, s, i, j);
             f1 = fo - delta1 + delta2;
             if(!estaNaListaTabu(i, j, listaTabu) || f1 < foEstrela){
-                // f1 < foEstrela -> critério de aspiração
+                // (f1 < foEstrela) -> critério de aspiração
                 if(f1 < foMelhorVizinho){
                     melhorI = i;
                     melhorJ = j;
@@ -101,11 +101,13 @@ double buscaTabu(const Instancia &inst, std::vector<int> &s,
         fo = melhorVizinhoTabu(inst, s, fo, melhorI, melhorJ, foEstrela, listaTabu);
         std::swap(s[melhorI], s[melhorJ]);
         atualizaListaTabu(listaTabu, tamanhoMaximoLista, melhorI, melhorJ);
-
+        registraProgresso(arquivoLog, 0.0, iterBT, fo);
+        
         if(fo < foEstrela){
             foEstrela = fo;
             sEstrela = s;
             melhorIter = iterBT;
+            registraProgresso(arquivoLogMelhorFo, 0.0, iterBT, foEstrela);
         }
 
     }
