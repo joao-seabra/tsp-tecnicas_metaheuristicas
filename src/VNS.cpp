@@ -1,4 +1,7 @@
+// João Pedro Seabra Nogueira
+// 25.1.4003
 #include "VNS.h"
+#include "VND.h"
 #include "BuscaLocal.h" // calculaDelta, descida
 #include "Utilitarios.h"
 #include "Aleatorio.h"
@@ -48,6 +51,30 @@ double vns(const Instancia &inst, std::vector<int> &s, int vnsMax, int r)
     std::cout << "Iter VNS = " << iter << "\t fo_star = " << fo << '\n';
 
     //TODO
+    std::vector<int> sEstrela = s;
+    double foEstrela = fo;
+    int k = 1;
+    while(iter - melhorIter < vnsMax){
+        k = 1;
+        while(k <= r){
+            fo = geraKVizinhosAleatorios(inst, s, fo, k);
+            // fo = descidaPrimeiroMelhora(inst, s);
+            // fo = descida(inst, s);
+            fo = vnd(inst, s, 3);
+            if(fo < foEstrela){
+                sEstrela = s;
+                foEstrela = fo;
+                k = 1;
+                melhorIter = iter;
+            }
+            else{
+                k++;
+                iter++;
+            }            
+        }
+    }
+    s = sEstrela;
+    fo = foEstrela;
 
     return fo;
 }
